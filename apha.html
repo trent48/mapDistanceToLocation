@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+
+	<h1>Hertz locator tool</h1>
+
+	<p>enter address or location to find closest hertz DOWNTOWN location</p>
+
+	<button type="button" onclick="myFunction()">search</button>
+	<input type="text" id="address">
+	<p id="demo"></p>
+
+
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+	<script >
+
+	var address
+	var geocoder
+	var addloc = []
+	var addlatitude = ''
+	var addlongitude =  ''
+	function initialize(){
+		geocoder = new google.maps.Geocoder();
+	}
+
+	function codeAddress(callback){
+		geocoder = new google.maps.Geocoder();
+		geocoder.geocode({
+			"address" : address
+		}, function(results, status){
+			if (status == google.maps.GeocoderStatus.OK){
+				addlatitude = results[0].geometry.location.lat()
+				addlongitude = results[0].geometry.location.lng()
+
+				//addlatitude = parseFloat(addlatitude)
+				//addlongitude = parseFloat(addlongitude)
+				//document.getElementById("demo").innerHTML += addlatitude + "/" + addlongitude + "<br>" 
+				searchloc()
+			}else{
+				alert("geocoder was not successful for the follwing reasons: "+ status)
+			}
+		})
+	
+	}
+	var latitude
+	var longitude
+
+	var desloc = []
+	function myFunction(){
+		address = document.getElementById('address').value
+		codeAddress()
+}
+//search all locations
+
+function searchloc(){
+	for (i in directory) {
+		//pase the gps loc
+		var pasegps = directory[i][1]
+  //tide gps
+  		pasegps = pasegps.replace(/[()]/g,'')
+  		pasegps = pasegps.trim()
+  		pasegps = pasegps.split(",")
+  		latitude = pasegps[0]
+  		longitude = pasegps[1]
+
+//find distance with gps
+		findDistance()
+ //creat array of locations under 100km
+ 		if (km < 100){
+
+ 			desloc.push([km,i])
+ 		}
+
+	}
+
+	displaying()
+}
+ 
+
+
+function displaying(){
+	//display the array of locations
+	for (i in desloc){
+	document.getElementById("demo").innerHTML += directory[desloc[i][1]][0]+"<br>" +desloc[i] + " km<br>"
+
+}
+}
+var Rm = 3961; // mean radius of the earth (miles) at 39 degrees from the equator
+	var Rk = 6373; // mean radius of the earth (km) at 39 degrees from the equator
+
+	var km
+
+	/* main function */
+	function findDistance() {
+		
+		var t1, n1, t2, n2, lat1, lon1, lat2, lon2, dlat, dlon, a, c, dm, dk, mi ;
+		latitudediv = document.getElementById('latitudediv')
+		longitudediv = document.getElementById('longitudediv')
+              // get values for lat1, lon1, lat2, and lon2
+              t1 = addlatitude;
+              n1 = addlongitude;
+              t2 = latitude;
+              n2 = longitude;
+              //document.getElementById("demo").innerHTML += t1 + "/" + n1 + "/"+ t2 + "/" +n2 + "<br>"
+
+              // convert coordinates to radians
+              lat1 = deg2rad(t1);
+              lon1 = deg2rad(n1);
+              lat2 = deg2rad(t2);
+              lon2 = deg2rad(n2);
+
+              // find the differences between the coordinates
+              dlat = lat2 - lat1;
+              dlon = lon2 - lon1;
+
+              // here's the heavy lifting
+              a  = Math.pow(Math.sin(dlat/2),2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon/2),2);
+              c  = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); // great circle distance in radians
+              dm = c * Rm; // great circle distance in miles
+              dk = c * Rk; // great circle distance in km
+
+              // round the results down to the nearest 1/1000
+              mi = round(dm);
+              km = round(dk)
+              
+              
+
+              //document.getElementById("demo").innerHTML += km +"<br>"
+              // display the result
+             //latitudediv.innerHTML = mi;
+             //longitudediv.innerHTML = km;
+         }
+
+       // convert degrees to radians
+       function deg2rad(deg) {
+              rad = deg * Math.PI/180; // radians = degrees * pi/180
+              return rad;
+          }
+
+
+       // round to the nearest 1/1000
+       function round(x) {
+       	return Math.round( x * 1000) / 1000;
+       }
+
+       google.maps.event.addDomListener(window, 'load', initialize);
+
+       var directory = [['Albury Downtown ',' (-36.0711, 146.955418) ','1 Avalon Street, Albury (Albury) , New South Wales, Australia  ','Phone: 02 60216166  ','Mon-Fri 0730-1830, Sat 0730-1730, Sun 0800-1800 ','Location Type: Independent Licensee'] , 
+       ['Armidale Downtown ',' (-30.5143425, 151.6669644) ','Armidale Tourist Park, Armidale (Armidale) , New South Wales, Australia  ','Phone: 02 67720620  ','Mon-Sun 0730-1900 ','Location Type: Independent Licensee '] , 
+       ['Artarmon Downtown ',' (-33.8164044, 151.1806409) ','77 Whiting Street, Artarmon (Artarmon) , New South Wales, Australia  ','Phone: 02 94381155  ','Mon-Fri 0730-1700, Sat 0800-1200, Sun Closed ','Location Type: Corporate'] , 
+       ['Ballina Downtown ',' (-28.8684827, 153.560001) ','Cessna and De Havilland Drives, Ballina (Ballina) , New South Wales, Australia  ','Phone: 02 66862143  ','Mon-Fri 0800-1700, Sat 0800-1200 1500-1700, Sun 0900-1100, 1500-1700 ','Location Type: Independent Licensee'] , 
+       ['Bankstown Downtown ',' (-33.9344775, 151.0349327) ','123 Canterbury Road, Bankstown (Bankstown) , New South Wales, Australia  ','Phone: 0297932400  ','Mon-Fri 0730-1730 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Bathurst Downtown   ',' (-33.418354, 149.568887) ','260 Stewart StreetBathurst (Bathurst) , New South Wales, Australia  ','Phone: 0263325255  ','Mon-Fri 0800-1700 Sat 0800-1300 Sun 0900-1300 ','Location Type: Independent Licensee '] , 
+       ['Broken Hill Downtown   ',' (-31.958402, 141.464175) ','193 Argent StreetBroken Hill (Broken Hill) , New South Wales, Australia  ','Phone: 0880872719  ','Mon-Fri 0900-1700 Sat-Sun 0900-1400 ','Location Type: Independent Licensee '] , 
+       ['Brookvale Downtown   ',' (-33.762444, 151.271999) ','3 / 539 Pittwater RdBrookvale (Brookvale) , New South Wales, Australia  ','Phone: 02 99051800  ','Mon-Fri 0730-1700 Sat 0800-1200 Sun Closed ','Location Type: Corporate'] , 
+       ['Byron Bay Downtown   ',' (-28.6441616, 153.6123788) ','5 Marvell StreetByron Bay (Byron Bay) , New South Wales, Australia  ','Phone: 02 66218855  ','Mon-Sat 0830-1700, Sun 0900-1200 1400-1700 ','Location Type: Independent Licensee '] , 
+       ['Campbelltown Downtown   ',' (-34.0655864, 150.8151414) ','27-3 Queen StreetCampbelltown (Campbelltown) , New South Wales, Australia  ','Phone: 0246287575  ','Mon-Fri 0700-1730 Sat-Sun 0700-1200 ','Location Type: Independent Licensee '] , 
+       ['Casino Downtown   ',' (-28.859199, 153.049846) ','82-86 Johnston StCasino (Casino) , New South Wales, Australia  ','Phone: 02 6621 8855  ','Mon-Fri 0830-1700 Sat 0900-1230 Sun 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Castle Hill Downtown   ',' (-33.72816, 150.984141) ','Unit 2 / 8 Gladstone RoadCastle Hill (Castle Hill) , New South Wales, Australia  ','Phone: 02 88506266  ','Mon-Fri 0730-1730 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Cessnock Downtown   ',' (-32.844842, 151.365803) ','Lot A Aberdare RoadCessnock (Cessnock) , New South Wales, Australia  ','Phone: 0249912500  ','Mo-Fr 0800-1700, Sa 0800-1200, Su closed ','Location Type: Independent Licensee '] , 
+       ['Cobar Downtown   ',' (-31.4979708, 145.8381988) ','6 Campbell StCobar (Cobar) , New South Wales, Australia  ','Phone: 02 68364005  ','Mon-Fri 0800-1700 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Coffs Harbour Downtown   ',' (-30.3059399, 153.1017313) ','Pacific Hwy and Halls RdCoffs Harbour (Coffs Harbour) , New South Wales, Australia  ','Phone: 0266511899  ','Mo-Fr 0800-1700, Sa 0800-1200, Su 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Cooma Downtown   ',' (-36.236405, 149.123673) ','4 Sharp StCooma (Cooma) , New South Wales, Australia  ','Phone: 02 6495 3444  ','Mon-Fri 0800-1700, Sat 0900-1300, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Cootamundra Downtown   ',' (-34.6501163, 148.0205307) ','4 Hovell StreetCootamundra (Cootamundra) , New South Wales, Australia  ','Phone: 02 69386000  ','Mon-Fri 0800-1700 Sat 0800-1200 Sun 0900-1000 ','Location Type: Independent Licensee '] , 
+       ['Cowra Downtown   ',' (-33.820882, 148.684516) ','86 Redfern StreetCowra (Cowra) , New South Wales, Australia  ','Phone: 0448414224  ','Mon-Fri 0800-1700, Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Dubbo Downtown   ',' (-32.245477, 148.59078) ','51 Victoria StreetDubbo (Dubbo) , New South Wales, Australia  ','Phone: 02 68848688  ','Mon-Sun 0800-1800 ','Location Type: Independent Licensee '] , 
+       ['Five Dock Downtown   ',' (-33.8674861, 151.1300906) ','49 Parramatta RdFive Dock (Five Dock) , New South Wales, Australia  ','Phone: 02 97995333  ','Mon-Fri 0730-1700, Sat - Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Forster Downtown   ',' (-32.181441, 152.513239) ','shop 6, 2-6 Wallis StForster (Forster) , New South Wales, Australia  ','Phone: 1300767339  ','Mon-Fri 0900-1700 Sat 0900-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Gosford Downtown   ',' (-33.4177633, 151.3435894) ','359-363 Mann StGosford (North Gosford) , New South Wales, Australia  ','Phone: 0243249859  ','Mon-Fri 0700-1730 Sat-Sun 0700-1200 ','Location Type: Independent Licensee '] , 
+       ['Goulburn Downtown   ',' (-34.747443, 149.729376) ','29 Lagoon StreetGoulburn (Goulburn) , New South Wales, Australia  ','Phone: 02 48210288  ','on-Fri 0730-1730 Sat-Sun 0800-1730 ','Location Type: Independent Licensee '] , 
+       ['Grafton Downtown   ',' (-29.6864911, 152.9372974) ','Cnr Prince & Oliver StreetsGrafton (Grafton) , New South Wales, Australia  ','Phone: 02 6621 8855  ','Mon-Fri 0800-1700, Sat-Sun 0800-1200 1600-1700 ','Location Type: Independent Licensee '] , 
+       ['Griffith Downtown   ',' (-34.2872974, 146.0458369) ','1 Ebert stGriffith (Griffith) , New South Wales, Australia  ','Phone: 02 6964 1111  ','Mon-Fri 0830-1700 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Gundagai Downtown   ',' (-35.063865, 148.102377) ','240 Sheridan StreetGundagai (Gundagai) , New South Wales, Australia  ','Phone: 02 69386000  ','Mon-Sun 0800-2100 ','Location Type: Independent Licensee '] , 
+       ['Gunnedah Downtown   ',' (-30.97947599999999, 150.253154) ','48 Barber StreetGunnedah (Gunnedah) , New South Wales, Australia  ','Phone: 02 6762 5545  ','Mon-Fri 0800-1700, Sat 0900-1100, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Inverell Downtown   ',' (-29.70043819999999, 151.1765615) ','5 Swanbrook RoadInverell (Inverell) , New South Wales, Australia  ','Phone: 1300767339  ','Mon-Fri 0800-1700 Sat 0900-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Katoomba Downtown   ',' (-33.7149546, 150.3114074) ','unit 5, 78-82 Megalong StreetKatoomba (katoomba) , New South Wales, Australia  ','Phone: 02 63325255  ','Mon-Fri 0800-1700 Sat 0800-1300 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Kempsey Downtown   ',' (-31.076364, 152.842766) ','92-96 Smith StKempsey (Kempsey) , New South Wales, Australia  ','Phone: 1300767339  ','Mon-Fri 0900-1700 Sat 0900-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Leeton Downtown   ',' (-34.5513933, 146.4066521) ','5 Pine Ave.Leeton (Leeton) , New South Wales, Australia  ','Phone: 02 69533600  ','Mon-Fri 0830-1730, Sat 0900-1200 Sun Closed ','Location Type: Corporate'] , 
+       ['Maitland Downtown   ',' (-32.7455534, 151.5992037) ','06 High StreetMaitland (Maitland) , New South Wales, Australia  ','Phone: 02 4934 5333  ','Mon-Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Lismore Downtown   ',' (-28.806483, 153.282258) ','41 Dawson StreetLismore (Lismore) , New South Wales, Australia  ','Phone: 02 66218855  ','Mo-Fr 0800-1700, Sa 0800-1200, 1600-1700, Su 0900-1030, 1600-1700 ','Location Type: Independent Licensee '] , 
+       ['Lithgow Downtown   ',' (-33.484047, 150.144018) ','307 Main stLithgow (Lithgow) , New South Wales, Australia  ','Phone: 02 63325255  ','Mon-Fri 0830-1700, Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Alexandria Downtown   ',' (-33.9297331, 151.1951145) ','Unit 6 / 22-223 Oriordan StMascot (Mascot) , New South Wales, Australia  ','Phone: 02 83381551  ','Hours of Operation: Mon-Fri 0700-1600 Sat 0800-1300 Sun Closed ','Location Type: Corporate'] , 
+       ['Merimbula Downtown   ',' (-36.8879816, 149.9062998) ','39 Merimbula DriveMerimbula (Merimbula) , New South Wales, Australia  ','Phone: 02 64953444  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0900-1300, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Moree Downtown   ',' (-29.4635666, 149.8432236) ','414 Frome StMoree (Moree) , New South Wales, Australia  ','Phone: 02 6762 5545  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Mudgee Downtown   ',' (-32.5905208, 149.5887613) ','4 Sydney RoadMudgee (Mudgee) , New South Wales, Australia  ','Phone: 0428 408 006  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1300 Sun 0900-1100 ','Location Type: Independent Licensee '] , 
+       ['Muswellbrook Downtown   ',' (-32.2651665, 150.888323) ','02-04 Sydney StreetMuswellbrook (Muswellbrook) , New South Wales, Australia  ','Phone: 02 65413443  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200 Sun closed ','Location Type: Independent Licensee '] , 
+       ['Narrabri Downtown   ',' (-30.3250572, 149.7829808) ','5 Caroline WayNarrabri (Narrabri) , New South Wales, Australia  ','Phone: 02 6762 5545  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Newcastle Downtown   ',' (-32.9241033, 151.761246) ','Unit , 1 Hannell StreetNewcastle (Wickham) , New South Wales, Australia  ','Phone: 02 49675223  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Corporate'] , 
+       ['Orange Downtown   ',' (-33.2992737, 149.1000488) ','1-5 Piesley StreetOrange (Orange) , New South Wales, Australia  ','Phone: 02 63620644  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1300 Sun 0900-1700 ','Location Type: Independent Licensee '] , 
+       ['Parkes Downtown   ',' (-33.1378642, 148.1748388) ','358 Clarinda StreetParkes (Parkes) , New South Wales, Australia  ','Phone: 02 68624122  ','Hours of Operation: Mon-Sun: 0700 - 2030 ','Location Type: Independent Licensee '] , 
+       ['Parramatta Downtown   ',' (-33.8337585, 151.0196852) ','39 PARRAMATTA ROADParramatta (Granville) , New South Wales, Australia  ','Phone: 02 97601543  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Penrith Downtown   ',' (-33.740453, 150.696224) ','2066 Castlereagh RoadPenrith (Penrith) , New South Wales, Australia  ','Phone: 02 47316344  ','Hours of Operation: Mo-Fr 0730-1700, Sa 0730-1200, Su 0800-1000 ','Location Type: Independent Licensee '] , 
+       ['Port Macquarie Downtown   ',' (-31.4312703, 152.9081313) ','7 Jindalee RdPort Macquarie (Port Macquarie) , New South Wales, Australia  ','Phone: 02 65836599  ','Hours of Operation: Mon-Sun 0800-1730 ','Location Type: Independent Licensee '] , 
+       ['Richmond Downtown   ',' (-33.6012605, 150.7614334) ','42 Windsor StreetRichmond (Richmond) , New South Wales, Australia  ','Phone: 02 45786166  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Singleton Downtown   ',' (-32.561798, 151.174506) ','26 Macquarie StreetSingleton (Singleton) , New South Wales, Australia  ','Phone: 02 65715355  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Smithfield Downtown',' (-33.8561468, 150.9372688) ','Cars  6 Long St Smithfield (Smithfield) , New South Wales, Australia  ','Phone: 02 96094664  ','Hours of Operation: Mon-Fri 0700-1730 Sat-Sun 0700-1200 ','Location Type: Independent Licensee '] , 
+       ['South Nowra Downtown   ',' (-34.922765, 150.605427) ','282 Princes HwySouth Nowra (South Nowra) , New South Wales, Australia  ','Phone: 02 44218377  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun closed ','Location Type: Independent Licensee '] , 
+       ['Sydney Downtown   ',' (-33.8912414, 151.203351) ','65 William StreetSydney (Sydney) , New South Wales, Australia  ','Phone: 02 93606621  ','Hours of Operation: Mon-Fri 0730-1730 Sat-Sun 0800-1600 ','Location Type: Corporate'] , 
+       ['Taree Downtown   ',' (-31.913344, 152.462537) ','3 Manning StTAREE (TAREE) , New South Wales, Australia  ','Phone: 1300 767 339  ','Hours of Operation: Mon-Fri 0900-17-0 Sat 0900-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Tamworth Downtown   ',' (-31.093929, 150.89865) ','46 Dampier StreetTamworth (Tamworth) , New South Wales, Australia  ','Phone: 02 67625545  ','Hours of Operation: Mon-Sat 0800-1700 Sun 0900-1700 ','Location Type: Independent Licensee '] , 
+       ['Tumut Downtown   ',' (-35.30106680000001, 148.2239419) ','Unit 8, 2 Jarrah RoadTumut (Tumut) , New South Wales, Australia  ','Phone: 0401 954205  ','Hours of Operation: Mon-Fri 0900-1700 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Tweed Heads Downtown   ',' (-28.2038198, 153.5401024) ','28 Machinery DriveTweed Heads (Tweed heads) , New South Wales, Australia  ','Phone: 07 55130131  ','Hours of Operation: Mon-Fri 0730-1700 Sat 0800-1400 Sun 0900-1400 ','Location Type: Independent Licensee '] , 
+       ['Wagga Wagga Downtown   ',' (-35.1205568, 147.3801259) ','90-9 Hammond Ave.Wagga Wagga (Wagga Wagga) , New South Wales, Australia  ','Phone: 02 6938 6000  ','Hours of Operation: Mon-Fri 0700-1900, Sat 0700-1800, Sun 0800-1900 ','Location Type: Independent Licensee '] , 
+       ['Wollongong Downtown   ',' (-37.794684, 144.9005576) ','73 Princes Highway (Unanderra)Wollongong (Unanderra) , New South Wales, Australia  ','Phone: 02 42716925  ','Hours of Operation: Mon-Fri 0700-1730, Sat 0700-1200 Sun 0700-1200 ','Location Type: Independent Licensee '] , 
+       ['Yass Downtown   ',' (-34.846708, 148.9150587) ','94-96 Comur StreetYass (Yass) , New South Wales, Australia  ','Phone: 02 62263232  ','Hours of Operation: Mon-Fri 0900-1700, Sat - Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Young Downtown   ',' (-34.3142198, 148.2977066) ','Main and Short StreetsYoung (Young) , New South Wales, Australia  ','Phone: 02 6382 1802  ','Hours of Operation: Mo-Su 0700-2000 ','Location Type: Independent Licensee '] , 
+       ['Alice Springs Downtown   ',' (-23.7033267, 133.8865696) ','34 Stott TerraceAlice Springs (Alice Springs) , Northern Territory, Australia  ','Phone: 0889528697  ','Hours of Operation: Mon-Fri 0900-1500, Sat-Sun Closed ','Location Type: Corporate'] , 
+       ['Ayers Rock Downtown   ',' (-25.2416808, 130.9832123) ','Resort Shopping SquareAyers Rock (Yulara) , Northern Territory, Australia  ','Phone: 08 8956 2244  ','Hours of Operation: MON-SUN 0800-1600 ','Location Type: Corporate'] , 
+       ['Darwin Downtown ',' (-12.4619224, 130.8385784) ','Shop 41, Mitchell Centre, Darwin (Darwin) , Northern Territory, Australia  ','Phone: 08 89410944  ','Hours of Operation: Mon-Fri 0800-1700 Sat-Sun 0800-1200 ','Location Type: Corporate'] , 
+       ['Katherine Downtown ',' (-14.4525184, 132.2690858) ','Giles Street, Katherine (Katherine) , Northern Territory, Australia  ','Phone: 08 89711111  ','Hours of Operation: Mon-Fri 0800-1600, Sat 0830-1230, Sun Closed ','Location Type: Corporate'] , 
+       ['Airlie Beach Downtown ',' (-20.2683828, 148.7182038) ','336 Shute Harbour Road, Airlie Beach (Airlie Beach) , Queensland, Australia  ','Phone: 07 49464687  ','Hours of Operation: Mon-Fri 0800-1700 Sat-Sun 0830-1600 ','Location Type: Independent Licensee '] , 
+       ['Biloela Downtown ',' (-24.405788, 150.50777) ','57-59 Dawson Highway, Biloela (Biloela) , Queensland, Australia  ','Phone: 07 48786899  ','Hours of Operation: Mon-Sun 0900-1700 ','Location Type: Corporate'] , 
+       ['Blackwater Downtown ',' (-23.5755145, 148.8886132) ','16 Railway Street, Blackwater (Blackwater) , Queensland, Australia  ','Phone: 07 49820693  ','Hours of Operation: Mon-Sun 0700-1900 ','Location Type: Corporate'] , 
+       ['Boondall Downtown ',' (-27.3486923, 153.0602677) ','1980 Sandgate Road, Boondall (Boondall) , Queensland, Australia  ','Phone: 07 3865 1044  ','Hours of Operation: Mon-Fri 0700-1700, Sat-Sun 0700-1200 ','Location Type: Independent Licensee '] , 
+       ['Brisbane Downtown ',' (-27.472031, 153.026515) ','55 Charlotte Street, Brisbane (Brisbane) , Queensland, Australia  ','Phone: 0732216166  ','Hours of Operation: Mon-Fri 0730-1700, Sat-Sun 0800-1300 ','Location Type: Corporate'] , 
+       ['Bundaberg Downtown ',' (-24.8947214, 152.3209889) ','Airport Drive, Bundaberg (Bundaberg) , Queensland, Australia  ','Phone: 07 4155 0884  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Caboolture Downtown ',' (-27.086834, 152.966273) ','107 Lower King Street, Caboolture (Caboolture) , Queensland, Australia  ','Phone: 07 54433108  ','Hours of Operation: Mon-Fri 0800-1600 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Cairns Downtown ',' (-16.9203287, 145.7708524) ','Shop1, Cairns Square Shopping Centre, Cairns (Cairns) , Queensland, Australia  ','Phone: 07 40516399  ','Hours of Operation: Mon-Fri 0730-1730 Sat-Sun 0800-1600 ','Location Type: Corporate'] , 
+       ['Chinchilla Downtown ',' (-26.7394351, 150.6250631) ','Cnr Warrego Highway / Glasson St, Chinchilla (Chinchilla) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri 0800-1600 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Dalby Downtown ',' (-27.1798036, 151.266726) ','14 New Street, Dalby (Dalby) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri 0800-1600 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Dysart Downtown ',' (-22.5862497, 148.3491354) ','Queen Elizabeth Dve, Dysart (Dysart) , Queensland, Australia  ','Phone: 07 49820693  ','Hours of Operation: Mon-Sun 0700-1900 ','Location Type: Corporate'] , 
+       ['Hervey Bay Downtown ',' (-25.3069472, 152.8892511) ','3 Kruger Crt, Hervey Bay (Urangan) , Queensland, Australia  ','Phone: 07 41256675  ','Hours of Operation: Mon-Fri 0730-1700, Sat 0730-1400, Sun 0800-1300 ','Location Type: Independent Licensee '] , 
+       ['Ipswich Downtown ',' (-27.659905, 152.739717) ','501 Warwick Road, Ipswich (Yamanto) , Queensland, Australia  ','Phone: 07 3294 3165  ','Hours of Operation: Mon - Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Maroochydore Downtown ',' (-20.9175738, 142.7027956) ','6 / 28 Aerodrome Rd, Maroochydore (Maroochdore) , Queensland, Australia  ','Phone: 07 54433108  ','Hours of Operation: Mon-Fri 0800-1700 Sat -Sun 0800-1400 ','Location Type: Independent Licensee '] , 
+       ['Middlemount Downtown ',' (-22.8102735, 148.6998219) ','5 Leichhardt Drive, Middlemount (Middlemount) , Queensland, Australia  ','Phone: 07 49820693  ','Hours of Operation: Mon-Fri 0800-1700 Sat-Sun 0900-1800 ','Location Type: Corporate'] , 
+       ['Miles Downtown   ',' (-26.6598028, 150.1963869) ','18 Murilla St, Miles (Miles) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri 0800-1600 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Moranbah Downtown ',' (-22.0009139, 148.0457654) ','25 Bacon St, Moranbah (Moranbah) , Queensland, Australia  ','Phone: 0401 140020  ','Hours of Operation: Mon-Fri 0900-1700 Sat 0900-1300 Sun Closed ','Location Type: Corporate'] , 
+       ['Moura Downtown ',' (-24.5716525, 149.9685824) ','63 Dawson Highway, Moura (Moura) , Queensland, Australia  ','Phone: 07 49786899  ','Hours of Operation: Mon-Sun 0700-1900 ','Location Type: Corporate'] , 
+       ['Mt Isa Downtown   ',' (-20.7352147, 139.4889171) ','38 Fourth Ave, Mt Isa (Mt Isa) , Queensland, Australia  ','Phone: 07 47434142  ','Hours of Operation: Mon-Fri 0800-1800, Sat 0900-1300, Sun 1400-1800 ','Location Type: Independent Licensee '] , 
+       ['Noosa Heads Downtown ',' (-26.3967945, 153.0885614) ','16 Noosa Drive, Noosa Heads (Noosa Heads) , Queensland, Australia  ','Phone: 0754749234  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Rocklea Downtown ',' (-27.544539, 153.013998) ','Cnr Boundary & Ipswich Rds ,Rocklea (Rocklea) , Queensland, Australia  ','Phone: 07 32167200  ','Hours of Operation: Mon-Fri 0700-1700 Sat - Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['St George Downtown ',' (-28.0315237, 148.5935803) ','104 Victoria St,St George (St George) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri 0800-1600 Sat-Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Tieri Downtown ',' (-23.0352609, 148.348671) ','11 Malvern Ave, Tieri (Tieri) , Queensland, Australia  ','Phone: 07 49820693  ','Hours of Operation: Mon-Sun 0700-1900 ','Location Type: Corporate'] , 
+       ['Toowoomba Downtown (Commercial) ',' (-27.568362, 151.95141) ','195 James Street, Toowoomba (Toowoomba) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri:08.00 - 17.00, Sat-Sun:08.00-12.00 ','Location Type: Corporate'] , 
+       ['Toowoomba Downtown - Cars ',' (-27.568362, 151.95141) ','195 James Street, Toowoomba (Toowoomba) , Queensland, Australia  ','Phone: 07 46131631  ','Hours of Operation: Mon-Fri:08.00 -17.00, Sat-Sun:08.00 -12.00 ','Location Type: Independent Licensee '] , 
+       ['Townsville Downtown ',' (-19.2576223, 146.8178787) ','32 Bombala St, Townsville (Townsville) , Queensland, Australia  ','Phone: 07 47289530  ','Hours of Operation: Mon-Fri 0830-1630 Sat-Sun Closed ','Location Type: Corporate'] , 
+       ['Adelaide Downtown ',' (-34.9217886, 138.5965703) ','125 North Terrace, Adelaide (Adelaide) , South Australia, Australia  ','Phone: 08 82312856  ','Hours of Operation: Mo-Fr 0730-1800, Sa-Su 0800-1400 ','Location Type: Corporate'] , 
+       ['Port Augusta Downtown ',' (-32.490436, 137.77798) ','1a Conroy Street,Port Augusta (Port Augusta) , South Australia, Australia  ','Phone: 08 8644 7799  ','Hours of Operation: Mon - Fri 0900 - 1700 ','Location Type: Independent Licensee '] , 
+       ['Whyalla Downtown ',' (-33.0379168, 137.5445357) ','5 Oborn St, Whyalla (Whyalla Norrie) , South Australia, Australia  ','Phone: 08 86447799  ','Hours of Operation: Mon-Fri 0830 - 1700, Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Albany Downtown ',' (-35.0158604, 117.8835757) ','13 Chevalier Street, Albany (Albany) , Western Australia, Australia  ','Phone: 08 98411595  ','Hours of Operation: Mon-Fri 0830-1700 Sat - Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Bunbury Downtown ',' (-33.341881, 115.651679) ','97 Forrest Avenue, Bunbury (Bunbury) , Western Australia, Australia  ','Phone: 08 97918911  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Exmouth Downtown ',' (-21.93739, 114.127014) ','24 Nimitz St, Exmouth (Exmouth) , Western Australia, Australia  ','Phone: 08 99494610  ','Hours of Operation:  ','Location Type: Corporate'] , 
+       ['Geraldton Downtown ',' (-28.7591141, 114.6330071) ','275 Place Road, Geraldton (Webberton) , Western Australia, Australia  ','Phone: 08 99652844  ','Hours of Operation: Mon-Fri 0700-1930, Sat-Sun 0800-1000 ','Location Type: Independent Licensee '] , 
+       ['Kalgoorlie Downtown ',' (-30.7797885, 121.4546031) ','Hart Kerspien Dve, Kalgoorlie (Kalgoorlie) , Western Australia, Australia  ','Phone: 08 90932211  ','Hours of Operation: Mon-Fri 0700-1700 1800-1900, Sat 0830-1330, Sun 1100-1200 1700-1830 ','Location Type: Independent Licensee '] , 
+       ['Mandurah Downtown ',' (-32.534599, 115.729325) ','118 Pinjarra Road, Mandurah (Mandurah) , Western Australia, Australia  ','Phone: 08 9582 7833  ','Hours of Operation: Mon-Fri 0800-1700 Sat- Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Melville Downtown ',' (-32.0339, 115.791405) ','377 Canning Highway, Melville (Melville) , Western Australia, Australia  ','Phone: 08 9319 1222  ','Hours of Operation: Mon-Fri 0800-1700, Sat-Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Osborne Park Downtown ',' (-31.9066405, 115.8137845) ','10-12 McDonald St, Osborne Park (Osborne Park) , Western Australia, Australia  ','Phone: 08 9242 2994  ','Hours of Operation: Mon-Fri 0800-1700 Sat-Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Perth Downtown ',' (-31.9505025, 115.8510575) ','475 Murray Street, Perth (Perth) , Western Australia, Australia  ','Phone: 08 93217777  ','Hours of Operation: Mon-Thu 0700-1800, Fri 0700-1830 Sat 0800-1300 Sun 0800-1300 ','Location Type: Corporate'] , 
+       ['Bairnsdale Downtown ',' (-37.824153, 147.692646) ','459 Princes Hwy, Bairnsdale (Bairnsdale) , Victoria, Australia  ','Phone: 03 51531111  ','Hours of Operation: Mon-Fri 0830-1700, Sat 0900-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Ballarat Downtown   ',' (-37.5970682, 143.8413342) ','17-19 Albert Street, Sebastopol, Ballarat (Sebastopol) , Victoria, Australia  ','Phone: (03) 53360111  ','Hours of Operation: Mon-Fri 0700-1700, Sat 0800-1200, Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Balwyn Downtown ',' (-37.8112955, 145.0675741) ','126 Whitehorse Rd, Balwyn (Deepdene) , Victoria, Australia  ','Phone: 03 98169866  ','Hours of Operation: Mon-Fri 0800-1730 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Brooklyn Downtown ',' (-37.8210632, 144.8350428) ','777 Geelong Rd, Brooklyn (Brooklyn) , Victoria, Australia  ','Phone: 03 93151010  ','Hours of Operation: Mon-Fri 0700-1700, Sat-Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Clayton Downtown ',' (-37.9216501, 145.1371998) ','875 Princes Highway, Clayton (Clayton) , Victoria, Australia  ','Phone: 03 95473555  ','Hours of Operation: Mon-Fri 0800-1730 Sat 0800-1200 Sun 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Echuca Downtown ',' (-36.140186, 144.731943) ','368-372 Ogilvie Ave, Echuca (Echuca) , Victoria, Australia  ','Phone: 03 54825655  ','Hours of Operation: Mon-Fri 0800-1700, Sat-Sun closed ','Location Type: Independent Licensee '] , 
+       ['Frankston Downtown ',' (-38.141754, 145.129079) ','47 Beach Street Frankston (Frankston) , Victoria, Australia  ','Phone: 03 97814266  ','Hours of Operation: Mon-Fri 0800-1730 Sat 0800-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Geelong Downtown ',' (-38.137829, 144.354179) ','18A The Esplanade South Geelong (Geelong) , Victoria, Australia  ','Phone: 03 5229 1100  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0800-1200, Sun 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Hoppers Crossing Downtown ',' (-37.87027459999999, 144.7246712) ','353 Old Geelong Road and Dunlop Ave, Hoppers Crossing (Hoppers Crossing) , Victoria, Australia  ','Phone: 03 8368 2300  ','Hours of Operation: Mon-Fri 0800-1700, Sat 0800-1200, Sun 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Melbourne Downtown ',' (-37.808138, 144.961267) ','97 Franklin Street, Melbourne (Melbourne) , Victoria, Australia  ','Phone: 03 96636244  ','Hours of Operation: Mon-Fri 0730-1800, Sat 0800-1600, Sun 0830-1700 ','Location Type: Corporate'] , 
+       ['Mitcham Downtown ',' (-37.8362202, 145.1861412) ','399 Canterbury Road Mitcham (Vermont) , Victoria, Australia  ','Phone: 03 98743500  ','Hours of Operation: Mon-Fri 0800-1730 Sat 0800-1200 Sun 0900-1200 ','Location Type: Independent Licensee '] , 
+       ['Moorabbin Downtown ',' (-37.9435158, 145.0600563) ','234 Chesterville Road, Moorabbin (Moorabbin) , Victoria, Australia  ','Phone: 03 9553 1200  ','Hours of Operation: Mon-Fri 0800-1730 Sat 0800-1200 Sun closed ','Location Type: Independent Licensee '] , 
+       ['Portland Downtown ',' (-38.3302506, 141.5926021) ','153 Browning Street, Portland (Portland) , Victoria, Australia  ','Phone: 03 55217211  ','Hours of Operation: Mon-Fri 0800-1730, Sat 0900-1000 Sun 1700-1900 ','Location Type: Independent Licensee '] , 
+       ['Preston Downtown ',' (-37.737763, 145.003714) ','234-242 High Street, Preston (Preston) , Victoria, Australia  ','Phone: 03 9484 4178  ','Hours of Operation: Mon-Fri 0730-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Sale Downtown ',' (-38.1017871, 147.0681139) ','294 York St, Sale (Sale) , Victoria, Australia  ','Phone: 03 51432330  ','Hours of Operation: Mon-Fri 0830-1230 1330 -1700, Sat 0900-1200, Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Shepparton Downtown ',' (-36.3822085, 145.4199125) ','54 Mitchell Street, Shepparton (Shepparton) , Victoria, Australia  ','Phone: 03 58315447  ','Hours of Operation: Mon- Fri 0900-1700 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Shepparton Downtown ',' (-36.3822085, 145.4199125) ','54 Mitchell Street, Shepparton (Shepparton) , Victoria, Australia  ','Phone: 03 58315447  ','Hours of Operation: Mon- Fri 0900-1700 Sat-Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Traralgon Downtown ',' (-38.19707, 146.540224) ','2 Livingstone St, Traralgon (Traralgon) , Victoria, Australia  ','Phone: 03 51765100  ','Hours of Operation: Mon-Fri 0800-1700 Sat 0900-1200 Sun Closed ','Location Type: Independent Licensee '] , 
+       ['Wangaratta Downtown ',' (-36.3513838, 146.3158784) ','Cnr Reid / Rowan Street, Wangaratta (Wangaratta) , Victoria, Australia  ','Phone: 03 57221422  ','Hours of Operation: Mon - Fri 0800-1800, Sat 0800-1600, Sun 0800-1200 ','Location Type: Independent Licensee '] , 
+       ['Warragul Downtown ',' (-38.1667957, 145.9449313) ','Factory 3, 177 Queen Street, Warragul (Warragul) , Victoria, Australia  ','Phone: 03 5176 5100  ','Hours of Operation: Mon-Fri 0900-1700, Sat 0800-1200, Sun Closed ','Location Type: Independent Licensee ']]
+
+
+       </script>
+
+   </body>
+   </html> 
